@@ -9,28 +9,13 @@
     />
   </v-dialog>
   <v-dialog v-model="modalDeleteStatus" persistent width="600">
-    <v-card outlined class="py-4">
-      <v-card-title class="px-6">{{ headerModalDeleteStatus }}</v-card-title>
-      <v-card-text>{{ bodyModalDeleteStatus }} </v-card-text>
-      <v-card-actions class="px-6">
-        <v-spacer />
-        <v-btn
-          color="error"
-          variant="tonal"
-          @click="modalDeleteStatus = false"
-          :disabled="loading"
-          >Cancelar</v-btn
-        >
-        <v-btn
-          color="info"
-          variant="tonal"
-          @click="actionDeleteChangeStatus"
-          :loading="loading"
-          :disabled="loading"
-          >Aceptar</v-btn
-        >
-      </v-card-actions>
-    </v-card>
+    <DeleteChangeStatus
+      :headerModalDeleteStatus="headerModalDeleteStatus"
+      :bodyModalDeleteStatus="bodyModalDeleteStatus"
+      :actionDeleteChangeStatus="actionDeleteChangeStatus"
+      :loading="loading"
+      :closeModalStatus="closeModalStatus"
+    />
   </v-dialog>
   <div class="taskList">
     <h1>Listado de Tareas</h1>
@@ -44,7 +29,7 @@
     />
     <div>
       <p class="my-2">Tareas encontradas: {{ dataTasks.length }}</p>
-      <v-table>
+      <v-table v-if="dataTasks.length">
         <thead class="bg-grey-lighten-2">
           <tr>
             <th class="text-left">Nro</th>
@@ -56,13 +41,18 @@
           </tr>
         </thead>
 
-        <draggable :list="dataTasks" @end="updateNumOrder" tag="tbody" :disabled="filterDeleteTasks">
+        <draggable
+          :list="dataTasks"
+          @end="updateNumOrder"
+          tag="tbody"
+          :disabled="filterDeleteTasks || dataTasks.length === 1"
+        >
           <tr
             v-for="(item, index) in dataTasks"
             :key="item.id"
             :class="{
-              successTr: item.status === 'pendiente',
-              warningTr: item.status !== 'pendiente',
+              successTr: item.status === 'completada',
+              warningTr: item.status === 'pendiente',
             }"
           >
             <td>{{ index + 1 }}</td>
@@ -72,6 +62,9 @@
             <td>{{ item.status }}</td>
             <td>
               <div v-if="!item.deleteAt" class="div-buttons-actions">
+                <span title="Editar tarea">
+                  <AkEdit @click.stop="showTaskId(item)" class="icon" />
+                </span>
                 <span title="Eliminar tarea">
                   <FlDelete
                     @click.stop="deleteChangeStatus(item, true)"
@@ -106,17 +99,21 @@
 <script>
 import Filters from "./Filters.vue";
 import ActionsTask from "./ActionsTask.vue";
+import DeleteChangeStatus from "./DeleteChangeStatus.vue";
 import { VueDraggableNext } from "vue-draggable-next";
 import { OcTrackedByClosedCompleted } from "@kalimahapps/vue-icons";
 import { FlDelete } from "@kalimahapps/vue-icons";
+import { AkEdit } from "@kalimahapps/vue-icons";
 
 export default {
   components: {
     Filters,
     ActionsTask,
+    DeleteChangeStatus,
     draggable: VueDraggableNext,
     OcTrackedByClosedCompleted,
     FlDelete,
+    AkEdit,
   },
   data() {
     return {
@@ -169,13 +166,6 @@ export default {
           this.task = null;
           this.deleteTask = false;
         }
-      },
-      deep: true,
-      immediate: true,
-    },
-    dataTasks: {
-      handler(newDataTasks) {
-        // console.log("newDataTasks ", newDataTasks);
       },
       deep: true,
       immediate: true,
@@ -312,6 +302,9 @@ export default {
     },
     filterTasksDeletedAction(value) {
       this.filterDeleteTasks = value;
+    },
+    closeModalStatus() {
+      this.modalDeleteStatus = false;
     },
   },
 };

@@ -22,6 +22,7 @@
             variant="outlined"
             dense
             :disabled="deleteTasks"
+            clearable
           ></v-select>
         </v-col>
         <v-col cols="12" md="3" class="pa-0 px-4 pa-md-2">
@@ -35,6 +36,7 @@
             variant="outlined"
             dense
             :disabled="deleteTasks"
+            clearable
           ></v-select>
         </v-col>
         <v-col cols="12" md="auto" class="text-right pa-0 px-4 pa-md-2">
@@ -113,6 +115,8 @@ export default {
       this.getTasks();
     },
     loadDeleteTasks() {
+      this.status = null;
+      this.priority = null;
       this.$emit('filterTasksDeleted', this.deleteTasks)
       let url = "/tasks";
       if (this.deleteTasks) url += `?delete=true`;
