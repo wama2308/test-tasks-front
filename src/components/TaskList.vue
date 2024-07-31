@@ -58,8 +58,8 @@
             <td>{{ index + 1 }}</td>
             <td>{{ item.title }}</td>
             <td>{{ item.description }}</td>
-            <td>{{ item.priority }}</td>
-            <td>{{ item.status }}</td>
+            <td>{{ capitalizeFirstLetter(item.priority) }}</td>
+            <td>{{ capitalizeFirstLetter(item.status) }}</td>
             <td>
               <div v-if="!item.deleteAt" class="div-buttons-actions">
                 <span title="Editar tarea">
@@ -306,6 +306,9 @@ export default {
     closeModalStatus() {
       this.modalDeleteStatus = false;
     },
+    capitalizeFirstLetter(value){
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
   },
 };
 </script>
